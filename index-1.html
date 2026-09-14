@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rollback Finder — realme Community</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Announcements -->
+  <section class="announce-bar" id="announceBar" aria-label="Announcements"></section>
+
+  <main class="wrap">
+
+    <!-- Hero -->
+    <header class="hero">
+      <div class="reel" aria-hidden="true">
+        <svg viewBox="0 0 120 120" width="72" height="72">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="2"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="2"
+                  stroke-dasharray="326" stroke-dashoffset="80" stroke-linecap="round"/>
+          <circle cx="60" cy="60" r="7" fill="var(--accent)"/>
+          <circle cx="60" cy="26" r="4" fill="var(--line)"/>
+          <circle cx="94" cy="60" r="4" fill="var(--line)"/>
+          <circle cx="60" cy="94" r="4" fill="var(--line)"/>
+          <circle cx="26" cy="60" r="4" fill="var(--line)"/>
+        </svg>
+      </div>
+      <h1>Roll your realme device back</h1>
+      <p class="sub">Pick the version you're on, find your device, get the official package thread — no digging through the support desk.</p>
+    </header>
+
+    <!-- Step 1: UI version -->
+    <section class="step" id="step1" data-state="active">
+      <p class="step-label"><span class="step-no">01</span> Which UI version are you currently on?</p>
+      <div class="chip-row" id="versionChips"></div>
+    </section>
+
+    <!-- Step 2: Series -->
+    <section class="step" id="step2" data-state="locked">
+      <p class="step-label"><span class="step-no">02</span> Choose your series</p>
+      <div class="chip-row" id="seriesChips"></div>
+    </section>
+
+    <!-- Step 3: Search -->
+    <section class="step" id="step3" data-state="locked">
+      <p class="step-label"><span class="step-no">03</span> Search your device</p>
+      <div class="search-box">
+        <input type="text" id="deviceSearch" placeholder="Type your device name…" autocomplete="off" disabled>
+        <ul class="suggestions" id="suggestions" hidden></ul>
+      </div>
+    </section>
+
+    <!-- Step 4: Result -->
+    <section class="step result" id="step4" data-state="locked">
+      <p class="step-label"><span class="step-no">04</span> Your rollback package</p>
+      <div class="result-card" id="resultCard">
+        <p class="empty-hint">Pick a device above to see its rollback thread here.</p>
+      </div>
+    </section>
+
+    <!-- Request box -->
+    <section class="request">
+      <h2>Not finding your device?</h2>
+      <p class="sub">Tell us which device and which rollback you need — it'll be added once available.</p>
+      <form id="requestForm">
+        <input type="text" id="reqDevice" placeholder="Device name" required>
+        <input type="text" id="reqVersion" placeholder="Rollback needed (e.g. UI 7 to 6)" required>
+        <button type="submit">Send request</button>
+      </form>
+      <p class="form-note" id="formNote" hidden></p>
+    </section>
+
+    <footer class="foot">
+      <p>Community-maintained · not an official realme product</p>
+    </footer>
+
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
