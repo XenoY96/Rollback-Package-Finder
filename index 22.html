@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rollback Finder — realme Community</title>
+<meta name="description" content="Find the official rollback package thread for your realme device.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rollback Finder">
+<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f4f0" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#14161a;
+  --panel:#1b1e24;
+  --panel-2:#21252c;
+  --text:#edeae3;
+  --muted:#8b9099;
+  --accent:#e8a33d;
+  --accent-soft:#3a2e1a;
+  --line:#2c3038;
+  --good:#6fcf97;
+  --danger:#e2836b;
+  --warn-bg:#3a1f1a;
+  --warn-border:#5a2f22;
+  --warn-text:#f2b8a3;
+  --radius:14px;
+  --font-head:'Sora',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+}
+
+/* The site simply follows the device's own light/dark setting — no toggle. */
+@media (prefers-color-scheme: light){
+  :root{
+    color-scheme: light;
+    --bg:#f6f4f0;
+    --panel:#ffffff;
+    --panel-2:#ece7de;
+    --text:#181a1c;
+    --muted:#565b62;
+    --accent:#a85d10;
+    --accent-soft:#f5e2c2;
+    --line:#ddd7cb;
+    --good:#1f7a4c;
+    --danger:#b3401f;
+    --warn-bg:#fbe6df;
+    --warn-border:#eab7a2;
+    --warn-text:#7c2e15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-head);
+  line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .2s ease, color .2s ease;
+}
+
+.wrap{max-width:560px;margin:0 auto;padding:0 20px 60px;}
+
+
+
+/* Announcements */
+.announce-bar{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:14px 16px;
+  background:var(--panel-2);
+  border-bottom:1px solid var(--line);
+  scrollbar-width:none;
+}
+.announce-bar::-webkit-scrollbar{display:none;}
+.announce-card{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--text);
+  text-decoration:none;
+  font-size:13px;
+  white-space:nowrap;
+  background:var(--panel);
+}
+.announce-card:before{
+  content:"";
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  flex:0 0 auto;
+}
+.announce-card:hover{border-color:var(--accent);}
+
+/* Hero */
+.hero{padding:44px 0 28px;}
+.reel{margin-bottom:18px;}
+.hero h1{
+  font-size:30px;
+  font-weight:800;
+  line-height:1.2;
+  margin:0 0 10px;
+  letter-spacing:-0.02em;
+}
+.hero .sub{
+  color:var(--muted);
+  font-size:15px;
+  max-width:38ch;
+  margin:0;
+}
+
+/* Steps */
+.step{
+  padding:24px 0;
+  border-top:1px solid var(--line);
+  transition:opacity .2s ease;
+}
+.step[data-state="locked"]{opacity:.35;pointer-events:none;}
+.step[data-state="active"]{opacity:1;pointer-events:auto;}
+.step[data-state="done"]{opacity:1;pointer-events:auto;}
+
+.step-label{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  font-size:15px;
+  font-weight:600;
+  margin:0 0 14px;
+}
+.step-no{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--accent);
+  border:1px solid var(--accent-soft);
+  background:var(--accent-soft);
+  padding:2px 6px;
+  border-radius:5px;
+}
+
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  font-family:var(--font-mono);
+  font-size:14px;
+  padding:9px 16px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  cursor:pointer;
+}
+.chip:hover{border-color:var(--accent);}
+.chip.selected{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#1a1204;
+  font-weight:600;
+}
+
+/* Search */
+.search-box{position:relative;}
+#deviceSearch{
+  width:100%;
+  padding:13px 14px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  font-family:var(--font-head);
+  font-size:15px;
+}
+#deviceSearch:disabled{opacity:.5;}
+#deviceSearch:focus{outline:none;border-color:var(--accent);}
+
+.suggestions{
+  list-style:none;
+  margin:6px 0 0;
+  padding:6px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-2);
+  position:absolute;
+  width:100%;
+  z-index:5;
+  max-height:240px;
+  overflow-y:auto;
+}
+.suggestions li{
+  padding:10px 10px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.suggestions li:hover,.suggestions li.hi{background:var(--panel);}
+.suggestions .tag{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--muted);
+}
+.suggestions li.no-match{
+  cursor:default;
+  color:var(--muted);
+}
+.suggestions li.no-match:hover{background:transparent;}
+.suggestions li.no-match a{color:var(--accent);}
+
+/* Result */
+.result-card{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px;
+  background:var(--panel);
+}
+.empty-hint{color:var(--muted);font-size:14px;margin:0;}
+.result-device{
+  font-size:13px;
+  color:var(--good);
+  font-family:var(--font-mono);
+  margin:0 0 4px;
+}
+.result-title{
+  font-size:18px;
+  font-weight:700;
+  margin:0 0 16px;
+}
+.result-link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--accent);
+  color:#1a1204;
+  text-decoration:none;
+  font-weight:700;
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:14px;
+  border:none;
+  font-family:var(--font-head);
+  cursor:pointer;
+}
+.result-alt{
+  margin:14px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+.result-alt a{color:var(--text);}
+
+/* Request */
+.request{
+  margin-top:20px;
+  padding:24px 0;
+  border-top:1px solid var(--line);
+}
+.request h2{font-size:18px;margin:0 0 6px;}
+.request .sub{color:var(--muted);font-size:14px;margin:0 0 16px;}
+#requestForm{display:flex;flex-direction:column;gap:10px;}
+#requestForm input{
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  font-family:var(--font-head);
+  font-size:14px;
+}
+#requestForm input:focus{outline:none;border-color:var(--accent);}
+#requestForm button{
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-weight:600;
+  cursor:pointer;
+}
+#requestForm button:hover{border-color:var(--accent);}
+#requestForm button{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,border-color .2s;}
+#requestForm button:disabled{cursor:default;opacity:.85;}
+#requestForm button.is-sent{background:var(--good);border-color:var(--good);color:#0f1a14;}
+.btn-spinner{
+  width:14px;height:14px;
+  border:2px solid rgba(237,234,227,.35);
+  border-top-color:var(--text);
+  border-radius:50%;
+  display:inline-block;
+  animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.btn-check{
+  display:inline-block;
+  animation:pop .35s ease;
+}
+@keyframes pop{
+  0%{transform:scale(0);opacity:0;}
+  60%{transform:scale(1.25);opacity:1;}
+  100%{transform:scale(1);}
+}
+.form-note{
+  font-size:13px;
+  color:var(--good);
+  margin-top:10px;
+  opacity:0;
+  transform:translateY(-4px);
+  animation:noteIn .3s ease forwards;
+}
+.form-note.error{color:var(--danger);}
+@keyframes noteIn{
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes shake{
+  10%,90%{transform:translateX(-1px);}
+  20%,80%{transform:translateX(2px);}
+  30%,50%,70%{transform:translateX(-4px);}
+  40%,60%{transform:translateX(4px);}
+}
+.shake{animation:shake .4s;}
+
+.state-msg{
+  padding:60px 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:15px;
+}
+.state-msg h2{
+  color:var(--text);
+  font-size:20px;
+  margin:0 0 8px;
+}
+.state-msg.loading{font-family:var(--font-mono);}
+
+/* Warning modal */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(10,11,13,.72);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:50;
+  padding:16px;
+}
+.modal-backdrop[hidden]{
+  display:none !important;
+}
+.modal-card{
+  width:100%;
+  max-width:520px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px;
+}
+.modal-card h3{
+  margin:0 0 14px;
+  font-size:18px;
+}
+.modal-steps{
+  margin:0 0 16px;
+  padding-left:20px;
+  color:var(--text);
+  font-size:14px;
+  line-height:1.6;
+}
+.modal-steps li{margin-bottom:10px;}
+.modal-steps b{display:block;font-weight:600;margin-bottom:2px;}
+.modal-warning{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  background:var(--warn-bg);
+  border:1px solid var(--warn-border);
+  color:var(--warn-text);
+  padding:12px 14px;
+  border-radius:10px;
+  font-size:13px;
+  margin:0 0 18px;
+}
+.modal-actions{display:flex;gap:10px;}
+.modal-cancel,.modal-continue{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  border:1px solid var(--line);
+}
+.modal-cancel{background:transparent;color:var(--muted);}
+.modal-continue{background:var(--accent);color:#1a1204;border-color:var(--accent);}
+
+.foot{
+  margin-top:30px;
+  padding-top:20px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+}
+
+/* ---------- Responsive: tablet & desktop ---------- */
+@media (min-width:640px){
+  .wrap{max-width:640px;padding:0 32px 70px;}
+  .hero{padding:56px 0 32px;}
+  .hero h1{font-size:34px;}
+  .hero .sub{max-width:44ch;}
+  .chip{font-size:15px;padding:10px 18px;}
+  #requestForm{flex-direction:row;flex-wrap:wrap;}
+  #requestForm input{flex:1 1 200px;}
+  #requestForm button{flex:0 0 auto;padding:12px 26px;}
+  .modal-backdrop{align-items:center;}
+  .modal-card{max-width:480px;}
+}
+@media (min-width:900px){
+  .wrap{max-width:760px;}
+  .hero{padding:72px 0 40px;}
+  .hero h1{font-size:42px;}
+  .result-card{padding:26px;}
+  .announce-bar{padding:16px max(20px, calc(50vw - 380px));}
+}
+
+</style>
+</head>
+<body>
+
+  <!-- Announcements -->
+  <section class="announce-bar" id="announceBar" aria-label="Announcements"></section>
+
+  <main class="wrap">
+
+    <p class="state-msg loading" id="loadingState" aria-live="polite">Loading…</p>
+
+    <!-- Hero -->
+    <header class="hero" hidden>
+      <div class="reel" aria-hidden="true">
+        <svg viewBox="0 0 120 120" width="72" height="72">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="2"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="2"
+                  stroke-dasharray="326" stroke-dashoffset="80" stroke-linecap="round"/>
+          <circle cx="60" cy="60" r="7" fill="var(--accent)"/>
+          <circle cx="60" cy="26" r="4" fill="var(--line)"/>
+          <circle cx="94" cy="60" r="4" fill="var(--line)"/>
+          <circle cx="60" cy="94" r="4" fill="var(--line)"/>
+          <circle cx="26" cy="60" r="4" fill="var(--line)"/>
+        </svg>
+      </div>
+      <h1>Want to rollback your realme device?</h1>
+      <p class="sub">A centralised place to find the official rollback package thread for your device — pick your version, search, and get the link.</p>
+    </header>
+
+    <!-- Step 1: UI version -->
+    <section class="step" id="step1" data-state="active" hidden>
+      <p class="step-label"><span class="step-no">01</span> Which UI version are you currently on?</p>
+      <div class="chip-row" id="versionChips"></div>
+    </section>
+
+    <!-- Step 2: Series -->
+    <section class="step" id="step2" data-state="locked">
+      <p class="step-label"><span class="step-no">02</span> Choose your series</p>
+      <div class="chip-row" id="seriesChips"></div>
+    </section>
+
+    <!-- Step 3: Search -->
+    <section class="step" id="step3" data-state="locked">
+      <p class="step-label"><span class="step-no">03</span> Search your device</p>
+      <div class="search-box">
+        <input type="text" id="deviceSearch" placeholder="Type your device name…" autocomplete="off" disabled>
+        <ul class="suggestions" id="suggestions" hidden></ul>
+      </div>
+    </section>
+
+    <!-- Step 4: Result -->
+    <section class="step result" id="step4" data-state="locked">
+      <p class="step-label"><span class="step-no">04</span> Your rollback package</p>
+      <div class="result-card" id="resultCard">
+        <p class="empty-hint">Pick a device above to see its rollback thread here.</p>
+      </div>
+    </section>
+
+    <!-- Request box -->
+    <section class="request">
+      <h2>Not finding your device?</h2>
+      <p class="sub">Tell us which device and which rollback you need — it'll be added once available.</p>
+      <form id="requestForm">
+        <input type="text" id="reqDevice" placeholder="Device name" required>
+        <input type="text" id="reqVersion" placeholder="Rollback needed (e.g. UI 7 to 6)" required>
+        <button type="submit">Send request</button>
+      </form>
+      <p class="form-note" id="formNote" aria-live="polite" hidden></p>
+    </section>
+
+    <footer class="foot">
+      <p>Community-maintained · not an official realme product</p>
+    </footer>
+
+  </main>
+
+  <!-- Rollback warning modal -->
+  <div class="modal-backdrop" id="warningModal" hidden>
+    <div class="modal-card">
+      <h3>Before you continue</h3>
+      <p class="modal-warning" id="modalWarning"></p>
+      <div class="modal-actions">
+        <button type="button" class="modal-cancel" id="modalCancel">Go back</button>
+        <button type="button" class="modal-continue" id="modalContinue">I know the consequences, continue</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- CONFIG ----------
+   Paste your deployed Apps Script Web App URL here.
+   (Deploy > New deployment > Web app, in Code.gs) */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsynTWk5NTxzb6BFLU44aQ6Hltn35qUxdpwnh1HF0Ra3pyF948bSjA04n37Wpq8BSW/exec";
+
+/* ---------- STATE ---------- */
+let DATA = {};
+let ANNOUNCEMENTS = [];
+let SETTINGS = {};
+let state = { version: null, series: null, device: null };
+
+/* ---------- LOAD ---------- */
+async function loadData() {
+  const res = await fetch(SCRIPT_URL);
+  const json = await res.json();
+  DATA = json.versions || {};
+  ANNOUNCEMENTS = json.announcements || [];
+  SETTINGS = json.settings || {};
+}
+
+function isOn(settingName) {
+  return !!(SETTINGS[settingName] && SETTINGS[settingName].value);
+}
+
+function messageFor(settingName, fallback) {
+  const s = SETTINGS[settingName];
+  return (s && s.message) ? s.message : fallback;
+}
+
+/* ---------- ANNOUNCEMENTS ---------- */
+function renderAnnouncements() {
+  const bar = document.getElementById("announceBar");
+  if (!ANNOUNCEMENTS.length) { bar.hidden = true; return; }
+  ANNOUNCEMENTS.forEach(a => {
+    const el = document.createElement("a");
+    el.className = "announce-card";
+    el.href = a.link;
+    el.textContent = a.text;
+    el.target = "_blank";
+    el.rel = "noopener";
+    bar.appendChild(el);
+  });
+}
+
+/* ---------- STEP 1: VERSION ---------- */
+function renderVersionChips() {
+  const row = document.getElementById("versionChips");
+  Object.keys(DATA).forEach(v => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.type = "button";
+    chip.textContent = v;
+    chip.addEventListener("click", () => selectVersion(v, chip));
+    row.appendChild(chip);
+  });
+}
+
+function selectVersion(version, chipEl) {
+  state.version = version;
+  state.series = null;
+  state.device = null;
+  [...chipEl.parentElement.children].forEach(c => c.classList.remove("selected"));
+  chipEl.classList.add("selected");
+
+  document.getElementById("step1").dataset.state = "done";
+  document.getElementById("step2").dataset.state = "active";
+  document.getElementById("step2").innerHTML = "";
+  buildStep2();
+  resetStep3();
+  resetResult();
+}
+
+/* ---------- STEP 2: SERIES ---------- */
+function buildStep2() {
+  const step2 = document.getElementById("step2");
+  const label = document.createElement("p");
+  label.className = "step-label";
+  label.innerHTML = `<span class="step-no">02</span> Choose your series`;
+  const row = document.createElement("div");
+  row.className = "chip-row";
+  row.id = "seriesChips";
+  step2.appendChild(label);
+  step2.appendChild(row);
+
+  const seriesList = [...new Set(DATA[state.version].map(r => r.series))];
+  seriesList.forEach(s => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.type = "button";
+    chip.textContent = s;
+    chip.addEventListener("click", () => selectSeries(s, chip));
+    row.appendChild(chip);
+  });
+}
+
+function selectSeries(series, chipEl) {
+  state.series = series;
+  state.device = null;
+  [...chipEl.parentElement.children].forEach(c => c.classList.remove("selected"));
+  chipEl.classList.add("selected");
+
+  document.getElementById("step2").dataset.state = "done";
+  document.getElementById("step3").dataset.state = "active";
+  const input = document.getElementById("deviceSearch");
+  input.disabled = false;
+  input.value = "";
+  input.focus();
+  resetResult();
+}
+
+/* ---------- STEP 3: SEARCH (fuzzy) ---------- */
+function normalize(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function fuzzyScore(query, target) {
+  const q = normalize(query), t = normalize(target);
+  if (!q) return 0;
+  if (t === q) return 100;
+  if (t.startsWith(q)) return 90;
+  if (t.includes(q)) return 75;
+  let matches = 0, ti = 0;
+  for (const ch of q) {
+    const idx = t.indexOf(ch, ti);
+    if (idx !== -1) { matches++; ti = idx + 1; }
+  }
+  if (matches < q.length) return 0; // every character in the query must appear, in order
+  return 50;
+}
+
+function getRowsForCurrentScope() {
+  return DATA[state.version].filter(r => r.series === state.series);
+}
+
+function searchDevices(query) {
+  const rows = getRowsForCurrentScope();
+  const results = [];
+  rows.forEach(row => {
+    row.devices.forEach(deviceName => {
+      const score = fuzzyScore(query, deviceName);
+      if (score > 0) results.push({ deviceName, row, score });
+    });
+  });
+  results.sort((a, b) => b.score - a.score);
+  return results.slice(0, 6);
+}
+
+function initSearch() {
+  const input = document.getElementById("deviceSearch");
+  const list = document.getElementById("suggestions");
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim();
+    if (!q) { list.hidden = true; list.innerHTML = ""; return; }
+    const matches = searchDevices(q);
+    if (!matches.length) {
+      list.innerHTML = `<li class="no-match"><span>Device not found. <a href="#requestForm">Submit a request below</a>.</span></li>`;
+      list.hidden = false;
+      return;
+    }
+    list.innerHTML = "";
+    matches.forEach(m => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${m.deviceName}</span><span class="tag">${m.row.series}</span>`;
+      li.addEventListener("click", () => pickDevice(m.deviceName, m.row));
+      list.appendChild(li);
+    });
+    list.hidden = false;
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-box")) list.hidden = true;
+  });
+}
+
+function resetStep3() {
+  document.getElementById("step3").dataset.state = "locked";
+  const input = document.getElementById("deviceSearch");
+  input.disabled = true;
+  input.value = "";
+  document.getElementById("suggestions").hidden = true;
+}
+
+/* ---------- WARNING MODAL (shown before opening any thread link) ---------- */
+const ROLLBACK_WARNING = "Rollback is the last option to try. If you're facing any issue, please reach out to realme Customer Care or your nearest Service Centre first. Rollback is not recommended unless necessary — it erases all data on your device, complete data loss, with no way to recover it.";
+
+let pendingLink = null;
+
+function initWarningModal() {
+  document.getElementById("modalWarning").textContent = "⚠ " + ROLLBACK_WARNING;
+
+  document.getElementById("modalCancel").addEventListener("click", closeWarningModal);
+  document.getElementById("warningModal").addEventListener("click", (e) => {
+    if (e.target.id === "warningModal") closeWarningModal();
+  });
+  document.getElementById("modalContinue").addEventListener("click", () => {
+    if (pendingLink) window.open(pendingLink, "_blank", "noopener");
+    closeWarningModal();
+  });
+}
+
+function openWarningModal(link) {
+  pendingLink = link;
+  document.getElementById("warningModal").hidden = false;
+}
+
+function closeWarningModal() {
+  pendingLink = null;
+  document.getElementById("warningModal").hidden = true;
+}
+
+/* ---------- STEP 4: RESULT ---------- */
+function pickDevice(deviceName, row) {
+  state.device = deviceName;
+  document.getElementById("suggestions").hidden = true;
+  document.getElementById("deviceSearch").value = deviceName;
+  document.getElementById("step3").dataset.state = "done";
+  document.getElementById("step4").dataset.state = "active";
+
+  const card = document.getElementById("resultCard");
+  card.innerHTML = `
+    <p class="result-device">${state.version} → rollback confirmed</p>
+    <p class="result-title">${deviceName}</p>
+    <button type="button" class="result-link" id="openThreadBtn">Open rollback thread</button>
+    <p class="result-alt">Wrong device? <a href="#requestForm">Request it instead</a></p>
+  `;
+  document.getElementById("openThreadBtn").addEventListener("click", () => openWarningModal(row.link));
+}
+
+function resetResult() {
+  document.getElementById("step4").dataset.state = "locked";
+  document.getElementById("resultCard").innerHTML =
+    `<p class="empty-hint">Pick a device above to see its rollback thread here.</p>`;
+}
+
+/* ---------- REQUEST FORM ---------- */
+/* Mirrors the backend's validateField() so users get instant feedback
+   instead of waiting on a round-trip for something obviously invalid. */
+function validateField(text, maxLen) {
+  const t = text.trim();
+  if (!t) return { ok: false, reason: "This field is required." };
+  if (t.length > maxLen) return { ok: false, reason: `Keep it under ${maxLen} characters.` };
+  if (/https?:\/\/|www\.|\.(com|net|org|in|io|co|link|xyz)\b/i.test(t)) {
+    return { ok: false, reason: "Links aren't allowed here — just the device/version." };
+  }
+  if (/<[^>]*>|javascript:|on\w+\s*=/i.test(t)) {
+    return { ok: false, reason: "That contains characters that aren't allowed." };
+  }
+  if (/^[=+\-@]/.test(t)) {
+    return { ok: false, reason: "That contains characters that aren't allowed." };
+  }
+  return { ok: true };
+}
+
+function initRequestForm() {
+  const form = document.getElementById("requestForm");
+  const note = document.getElementById("formNote");
+
+  if (isOn("Block Requests")) {
+    form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    note.hidden = false;
+    note.textContent = messageFor("Block Requests", "Requests are paused right now — check back later.");
+    return;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const deviceEl = document.getElementById("reqDevice");
+    const versionEl = document.getElementById("reqVersion");
+    const sendBtn = form.querySelector("button[type=submit]");
+    const btnLabel = "Send request";
+
+    function showNote(text, isError) {
+      note.hidden = false;
+      note.textContent = text;
+      note.className = "form-note" + (isError ? " error" : "");
+      // restart the fade-in animation
+      void note.offsetWidth;
+      note.style.animation = "none";
+      void note.offsetWidth;
+      note.style.animation = "";
+    }
+
+    function fail(text) {
+      showNote(text, true);
+      form.classList.remove("shake");
+      void form.offsetWidth;
+      form.classList.add("shake");
+    }
+
+    const deviceCheck = validateField(deviceEl.value, 60);
+    if (!deviceCheck.ok) { fail(deviceCheck.reason); return; }
+    const versionCheck = validateField(versionEl.value, 50);
+    if (!versionCheck.ok) { fail(versionCheck.reason); return; }
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = `<span class="btn-spinner"></span> Sending…`;
+
+    const payload = { device: deviceEl.value.trim(), version: versionEl.value.trim() };
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const result = await res.json();
+      if (result.ok) {
+        sendBtn.innerHTML = `<span class="btn-check">✓</span> Sent`;
+        sendBtn.classList.add("is-sent");
+        form.reset();
+        showNote("Got it — we'll take a look and add it if possible.", false);
+      } else {
+        fail("That couldn't be submitted — check for links or special characters.");
+      }
+    } catch (err) {
+      fail("Something went wrong sending that — try again in a bit.");
+    } finally {
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove("is-sent");
+        sendBtn.textContent = btnLabel;
+      }, 1600);
+    }
+    setTimeout(() => { note.hidden = true; }, 5000);
+  });
+}
+
+/* ---------- MAINTENANCE ---------- */
+function showMaintenance(message) {
+  document.querySelector(".wrap").innerHTML = `
+    <div class="state-msg">
+      <h2>Down for a moment</h2>
+      <p>${message}</p>
+    </div>`;
+}
+
+/* ---------- PWA: service worker ---------- */
+function initServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => { /* offline caching is a bonus, not required */ });
+  });
+}
+
+/* ---------- INIT ---------- */
+(async function init() {
+  initServiceWorker();
+
+  const loading = document.getElementById("loadingState");
+  try {
+    await loadData();
+  } catch (err) {
+    loading.textContent = "Couldn't load data — check your connection and reload.";
+    return;
+  }
+
+  if (isOn("Maintenance Mode")) {
+    showMaintenance(messageFor("Maintenance Mode", "Back shortly — doing some maintenance."));
+    return;
+  }
+
+  loading.hidden = true;
+  document.querySelectorAll(".hero, #step1").forEach(el => el.hidden = false);
+
+  renderAnnouncements();
+  renderVersionChips();
+  initSearch();
+  initRequestForm();
+  initWarningModal();
+})();
+
+</script>
+</body>
+</html>
