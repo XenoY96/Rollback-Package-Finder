@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rollback Package Finder — realme Community</title>
+<meta name="description" content="Find the official post from realme where the rollback package for your device is available.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rollback Finder">
+<meta name="theme-color" content="#0B0E14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F6FA" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+
+<!-- Fonts: Sora for headings, Inter for UI text, JetBrains Mono for code-base UI -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  color-scheme: dark;
+  /* Code-Base Dark IDE Palette */
+  --bg: #0B0E14;
+  --panel: #111622;
+  --panel-2: #181F2E;
+  --code-bg: #0D111A;
+  --text: #EDF1F7;
+  --text-muted: #8B95A8;
+
+  /* Brand & Syntax Accents */
+  --accent: #FFC915;
+  --accent-hover: #E5B410;
+  --accent-soft: rgba(255, 201, 21, 0.16);
+  --accent-text: #0D111A;
+
+  --cyan: #5CE1E6;
+  --cyan-soft: rgba(92, 225, 230, 0.12);
+  --kw: #C792EA;
+  --prop: #82AAFF;
+  --cmt: #6E7A91;
+  --grid-line: rgba(92, 225, 230, 0.038);
+
+  --line: #232B3D;
+  --line-light: #333F58;
+
+  /* Status Colors */
+  --good: #20C997;
+  --good-bg: rgba(32, 201, 151, 0.12);
+  --danger: #FF6B6B;
+  --warn-bg: rgba(255, 107, 107, 0.10);
+  --warn-border: rgba(255, 107, 107, 0.25);
+  --warn-text: #FF8787;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.34);
+
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #F4F6FA;
+    --panel: #FFFFFF;
+    --panel-2: #EEF2F7;
+    --code-bg: #F8FAFC;
+    --text: #111622;
+    --text-muted: #5C677D;
+
+    --accent: #FFC915;
+    --accent-hover: #E5B410;
+    --accent-soft: rgba(255, 201, 21, 0.24);
+    --accent-text: #111622;
+
+    --cyan: #0E7490;
+    --cyan-soft: rgba(14, 116, 144, 0.10);
+    --kw: #7C3AED;
+    --prop: #2563EB;
+    --cmt: #6B7280;
+    --grid-line: rgba(14, 116, 144, 0.045);
+
+    --line: #DDE3EC;
+    --line-light: #C6D0DE;
+
+    --good: #0CA678;
+    --good-bg: rgba(12, 166, 120, 0.11);
+    --danger: #E03131;
+    --warn-bg: #FFF5F5;
+    --warn-border: #FFD6D6;
+    --warn-text: #C92A2A;
+
+    --shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 88% -8%, rgba(255, 201, 21, 0.07), transparent 36%),
+    radial-gradient(circle at 8% 12%, rgba(92, 225, 230, 0.06), transparent 34%),
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: auto, auto, 24px 24px, 24px 24px;
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4 { font-family: var(--font-head); margin: 0; }
+a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.85; }
+
+.wrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 56px;
+}
+
+@media (min-width: 640px) {
+  .wrap { padding: 28px 28px 68px; }
+}
+@media (min-width: 900px) {
+  .wrap { margin: auto; padding: 36px 32px 64px; }
+}
+
+/* ---------- STARTUP: INITIALIZING DATABASE CODE CONSOLE ---------- */
+.init-shell {
+  width: 100%;
+  max-width: 620px;
+  margin: min(14vh, 110px) auto 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  box-shadow: var(--shadow), inset 0 0 0 1px rgba(92, 225, 230, 0.08);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.init-shell.is-ready {
+  border-color: rgba(32, 201, 151, 0.55);
+  box-shadow: 0 14px 36px rgba(32, 201, 151, 0.14);
+}
+.init-shell.is-leaving {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.985);
+}
+.init-shell.is-error {
+  border-color: var(--warn-border);
+}
+
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.code-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.win-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.win-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+.win-dots i:nth-child(1) { background: #FF5F56; }
+.win-dots i:nth-child(2) { background: #FFBD2E; }
+.win-dots i:nth-child(3) { background: #27C93F; }
+
+.code-filename {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.code-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  flex-shrink: 0;
+}
+.code-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: pulseDot 1s ease-in-out infinite;
+}
+.is-ready .code-status,
+.db-located .code-status { color: var(--good); }
+.is-ready .code-status-dot,
+.db-located .code-status-dot {
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+  animation: none;
+}
+.is-error .code-status { color: var(--danger); }
+.is-error .code-status-dot {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+  animation: none;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.78); }
+}
+
+.code-body {
+  padding: 14px 14px 16px;
+  font-family: var(--font-mono);
+  font-size: clamp(10.5px, 2.6vw, 12.5px);
+  line-height: 1.7;
+  min-height: 224px;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.code-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.code-ln {
+  color: var(--cmt);
+  opacity: 0.58;
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+  user-select: none;
+}
+.code-text { flex: 1; min-width: 0; }
+.tok-kw { color: var(--kw); }
+.tok-fn { color: var(--cyan); }
+.tok-str { color: var(--accent); }
+.tok-num { color: var(--accent); }
+.tok-ok { color: var(--good); font-weight: 700; }
+.tok-err { color: var(--danger); font-weight: 700; }
+.tok-prop { color: var(--prop); }
+.tok-cmt { color: var(--cmt); }
+
+@media (prefers-color-scheme: light) {
+  .tok-str, .tok-num { color: #B45309; }
+}
+
+.code-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: var(--cyan);
+  vertical-align: -2px;
+  margin-left: 2px;
+  box-shadow: 0 0 6px var(--cyan);
+  animation: cursorBlink 0.65s steps(1) infinite;
+}
+.is-ready .code-cursor,
+.db-located .code-cursor {
+  background: var(--good);
+  box-shadow: 0 0 6px var(--good);
+}
+@keyframes cursorBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+.code-progress {
+  height: 3px;
+  background: rgba(139, 149, 168, 0.16);
+  overflow: hidden;
+}
+.code-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--cyan), var(--good));
+  transition: width 0.22s linear;
+}
+.init-retry-wrap {
+  padding: 0 14px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+.init-retry-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+/* App reveal transition (uses backwards only so transform doesn't trap stacking contexts after ending) */
+.app-reveal {
+  animation: appFadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes appFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- ANNOUNCEMENTS ---------- */
+.announce-stack {
+  margin: 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.announce-card {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid var(--warn-border);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--warn-bg);
+  color: var(--text);
+  transition: opacity 0.2s;
+}
+.announce-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--warn-text);
+  background: rgba(255, 107, 107, 0.14);
+  border: 1px solid var(--warn-border);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.announce-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.announce-link {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+@media (prefers-color-scheme: light) {
+  .announce-link { color: #B45309; }
+}
+
+/* ---------- CODE-BASE APP SHELL HEADER & HERO ---------- */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-text);
+  box-shadow: 0 4px 12px var(--accent-soft);
+  flex-shrink: 0;
+}
+.logo-icon svg { width: 21px; height: 21px; }
+.header-title-wrap { min-width: 0; }
+.header-path {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--cyan);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.header-top h1 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.db-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--good);
+  background: var(--good-bg);
+  border: 1px solid rgba(32, 201, 151, 0.30);
+  padding: 5px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.db-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+
+.hero {
+  padding: 4px 2px 26px;
+  max-width: 760px;
+}
+.hero-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--cmt);
+  margin-bottom: 8px;
+}
+.hero h2 {
+  font-size: clamp(26px, 5vw, 42px);
+  font-weight: 800;
+  line-height: 1.12;
+  margin: 0 0 12px;
+  letter-spacing: -0.03em;
+}
+.hero .sub {
+  color: var(--text-muted);
+  font-size: clamp(14px, 2vw, 15.5px);
+  max-width: 680px;
+  margin: 0;
+}
+
+/* ---------- FAQ (CODE DOC ACCORDION) ---------- */
+.faq-section {
+  margin-bottom: 28px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.faq-section h3 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+}
+.faq-section h3::before {
+  content: "// ";
+  color: var(--cmt);
+}
+.faq-item {
+  border-top: 1px solid var(--line);
+}
+.faq-q {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.faq-q::-webkit-details-marker { display: none; }
+.faq-q::after {
+  content: "+";
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--accent);
+  transition: transform 0.2s;
+}
+@media (prefers-color-scheme: light) {
+  .faq-q::after { color: #B45309; }
+}
+.faq-item[open] .faq-q::after { transform: rotate(45deg); }
+.faq-a {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 14px;
+  padding-left: 12px;
+  border-left: 2px solid var(--line-light);
+}
+.faq-a a {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (prefers-color-scheme: light) {
+  .faq-a a { color: #B45309; }
+}
+
+.stepper-heading {
+  margin: 6px 0 18px;
+  font-size: clamp(19px, 3vw, 22px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stepper-heading::before {
+  content: ">_";
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+@media (prefers-color-scheme: light) {
+  .stepper-heading::before { color: #9A6F00; }
+}
+
+/* ---------- STEPPER (AUTO-ADAPTED MOBILE & PC) ---------- */
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 20;
+}
+.step {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  box-shadow: var(--shadow);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+.step[data-state="locked"] {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.step[data-state="active"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow);
+  z-index: 5;
+}
+.step[data-state="done"] {
+  border-color: var(--line);
+  z-index: 1;
+}
+
+.step-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-head);
+  font-size: 14.5px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+.step-no {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--code-bg);
+  border: 1.5px solid var(--line-light);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+.step[data-state="active"] .step-no {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.step[data-state="done"] .step-no {
+  border-color: var(--good);
+  background: var(--good-bg);
+  color: var(--good);
+}
+.step-change {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+  color: var(--cyan);
+  font: 600 11.5px var(--font-mono);
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.step-change:hover { border-color: var(--cyan); color: var(--text); }
+
+/* Mobile: compact collapsible steps */
+@media (max-width: 700px) {
+  .step[data-state="locked"] { display: none; }
+  .step[data-state="done"] { padding: 12px 14px; }
+  .step[data-state="done"] .chip-row,
+  .step[data-state="done"] .search-box { display: none; }
+  .step[data-state="done"] .step-label { margin: 0; }
+}
+
+/* PC / Desktop (>= 701px): connected vertical code-timeline */
+@media (min-width: 701px) {
+  .stepper {
+    gap: 22px;
+    border-left: 2px dashed var(--line-light);
+    margin-left: 15px;
+    padding-left: 26px;
+  }
+  .step {
+    padding: 20px 22px;
+  }
+  .step-label {
+    font-size: 15.5px;
+    margin: 0 0 14px;
+    position: relative;
+  }
+  .step-no {
+    position: absolute;
+    left: -64px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+  .step[data-state="locked"] {
+    opacity: 0.42;
+    filter: grayscale(0.7);
+  }
+  .step[data-state="done"] {
+    opacity: 0.92;
+  }
+}
+
+/* Keep active search dropdown above every other step on both PC & mobile */
+.step.search-open {
+  z-index: 30 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  pointer-events: auto !important;
+}
+
+/* ---------- CHIPS ---------- */
+.chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
+.chip {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.chip:hover {
+  border-color: var(--cyan);
+  background: var(--panel-2);
+  transform: translateY(-1px);
+}
+.chip:active { transform: scale(0.97); }
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  box-shadow: 0 4px 12px var(--accent-soft);
+}
+
+/* ---------- SEARCH ---------- */
+.search-box { position: relative; z-index: 40; }
+.search-prompt {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cyan);
+  pointer-events: none;
+}
+#deviceSearch {
+  width: 100%;
+  padding: 14px 16px 14px 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#deviceSearch:disabled { opacity: 0.55; }
+#deviceSearch:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.suggestions {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 6px;
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius-sm);
+  background-color: var(--panel);
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  max-height: 260px;
+  overflow-y: auto;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45);
+  isolation: isolate;
+}
+.suggestions li {
+  padding: 11px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s;
+}
+.suggestions li:hover, .suggestions li.hi { background: var(--panel-2); }
+.suggestions .tag {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--cyan);
+  background: var(--cyan-soft);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(92, 225, 230, 0.25);
+  flex-shrink: 0;
+}
+.suggestions li.no-match {
+  cursor: default;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+.suggestions li.no-match:hover { background: transparent; }
+.suggestions li.no-match a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (prefers-color-scheme: light) {
+  .suggestions li.no-match a { color: #B45309; }
+}
+
+/* ---------- STEP 4: CODE LOOKUP & MATCHING CODE-BASE RESULT CARD ---------- */
+.result-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  background: var(--code-bg);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.result-card.db-fetching,
+.result-card.db-resolved {
+  padding: 0;
+}
+.result-card.db-fetching {
+  border-color: rgba(92, 225, 230, 0.40);
+  box-shadow: inset 0 0 0 1px rgba(92, 225, 230, 0.10);
+}
+.result-card.db-located,
+.result-card.db-resolved {
+  border-color: rgba(32, 201, 151, 0.55);
+  box-shadow: 0 10px 28px rgba(32, 201, 151, 0.13), inset 0 0 0 1px rgba(32, 201, 151, 0.12);
+}
+.empty-hint {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  margin: 0;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.result-reveal {
+  animation: cardReveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Resolved Code-Base Output Body (Matches Searching Console) */
+.res-shell-body {
+  padding: 16px 15px 18px;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+@media (min-width: 640px) {
+  .res-shell-body { padding: 18px 20px 20px; }
+}
+
+.res-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.res-title-group { min-width: 0; flex: 1; }
+.result-device {
+  font-size: 11px;
+  color: var(--good);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.result-device::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+.result-title {
+  font-family: var(--font-head);
+  font-size: clamp(19px, 4.2vw, 26px);
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  overflow-wrap: anywhere;
+}
+.res-path-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cyan);
+  background: var(--cyan-soft);
+  border: 1px solid rgba(92, 225, 230, 0.28);
+  padding: 5px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+/* Structured Resolved Payload Code Block */
+.res-code-box {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--good);
+  border-radius: 9px;
+  background: var(--panel);
+  padding: 11px 12px;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: clamp(10.5px, 2.5vw, 12px);
+  line-height: 1.68;
+}
+.res-code-box .code-line {
+  gap: 10px;
+}
+
+/* Terminal-Styled Action Area */
+.res-action-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.result-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14.5px;
+  padding: 13px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  width: 100%;
+  min-height: 50px;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px var(--accent-soft);
+}
+.result-link:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--accent-soft);
+}
+.result-link:active { transform: translateY(0); }
+.result-link-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.result-link-prompt {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(13, 17, 26, 0.14);
+  flex-shrink: 0;
+}
+.result-link svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+.res-foot-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.res-foot-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cmt);
+}
+.result-alt {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.result-alt a {
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- REQUEST SECTION ---------- */
+.request {
+  position: relative;
+  z-index: 2;
+  margin: 28px auto 0;
+  padding: 22px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.request h2 {
+  font-size: 19px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.request h2 svg { color: var(--accent); width: 20px; height: 20px; flex-shrink: 0; }
+.request .sub { color: var(--text-muted); font-size: 13.5px; margin: 0 0 18px; }
+#requestForm { display: flex; flex-direction: column; gap: 11px; }
+.hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+#requestForm input {
+  padding: 13px 15px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  transition: all 0.2s;
+}
+#requestForm input:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--cyan-soft);
+}
+#requestForm button {
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-light);
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13.5px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+#requestForm button:hover { border-color: var(--accent); color: var(--accent); }
+#requestForm button:disabled { cursor: default; opacity: 0.7; }
+#requestForm button.is-sent { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+
+@media (min-width: 640px) {
+  #requestForm { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
+  #requestForm input { flex: 1 1 200px; }
+  #requestForm button { flex: 0 0 auto; }
+}
+
+.request-again {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--code-bg);
+  text-align: center;
+}
+.request-again p { margin: 0 0 12px; font-size: 14px; color: var(--text); }
+.request-again-actions { display: flex; gap: 10px; }
+.request-again-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  border: 1px solid var(--line);
+}
+#requestAgainYes { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+#requestAgainNo { background: transparent; color: var(--text-muted); }
+#requestAgainNo:hover { color: var(--text); }
+
+.contact-support {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+  text-align: center;
+}
+.contact-support-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+.contact-support-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--code-bg);
+  transition: border-color 0.2s, color 0.2s;
+}
+.contact-whatsapp:hover { border-color: #25D366; color: #25D366; }
+.contact-email:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Spinners, notes & animations */
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-check { display: inline-block; animation: pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.form-note {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--good);
+  margin-top: 12px;
+  padding: 11px 13px;
+  background: var(--good-bg);
+  border-radius: 8px;
+  border: 1px solid rgba(32, 201, 151, 0.30);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: noteIn 0.3s ease forwards;
+}
+.form-note.error { color: var(--danger); background: var(--warn-bg); border-color: var(--warn-border); }
+.form-note.success { color: var(--good); background: var(--good-bg); border-color: rgba(32, 201, 151, 0.35); }
+@keyframes noteIn { to { opacity: 1; transform: translateY(0); } }
+.request.submitting { opacity: 0.92; }
+.request.submitted { animation: successPulse 0.55s ease; }
+@keyframes successPulse { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); }
+  40%, 60% { transform: translateX(7px); }
+}
+.shake { animation: shake 0.48s; }
+.field-error { border-color: var(--danger) !important; box-shadow: 0 0 0 3px var(--warn-border) !important; }
+
+/* Maintenance screen */
+.state-msg {
+  max-width: 520px;
+  margin: 12vh auto 0;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14.5px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.state-msg h2 { color: var(--text); font-size: 22px; margin: 0 0 10px; }
+
+/* Warning Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 8, 13, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+.modal-backdrop[hidden] { display: none !important; }
+.modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--panel);
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  animation: modalSlide 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes modalSlide {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-icon {
+  width: 46px;
+  height: 46px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger);
+  margin: 0 auto 14px;
+}
+.modal-icon svg { width: 23px; height: 23px; }
+.modal-card h3 { margin: 0 0 10px; font-size: 19px; text-align: center; }
+.modal-warning {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.65;
+  text-align: center;
+  margin: 0 0 22px;
+}
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+@media (min-width: 640px) { .modal-actions { flex-direction: row; } }
+.modal-cancel, .modal-continue {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 13.5px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.modal-continue { background: var(--danger); color: #fff; border: none; }
+.modal-continue:hover { background: #E03131; }
+.modal-cancel { background: var(--code-bg); color: var(--text); border: 1px solid var(--line); }
+.modal-cancel:hover { background: var(--panel-2); }
+
+/* Footer */
+.foot {
+  position: relative;
+  z-index: 1;
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--line);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  text-align: center;
+  font-family: var(--font-mono);
+  line-height: 1.7;
+}
+.foot p { margin: 0 0 4px; }
+.foot p:last-child { margin-bottom: 0; }
+.foot a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+@media (prefers-color-scheme: light) {
+  .foot a { color: #B45309; }
+}
+</style>
+</head>
+<body>
+
+  <main class="wrap">
+
+    <!-- Startup: Proper Live-Coding Database Initialization Console -->
+    <section class="init-shell" id="loadingState" aria-live="polite">
+      <div class="code-bar">
+        <div class="code-bar-left">
+          <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="code-filename">initDatabase.js</span>
+        </div>
+        <span class="code-status" id="initStatusTag">
+          <span class="code-status-dot"></span>
+          <span id="initStatusText">booting</span>
+        </span>
+      </div>
+      <div class="code-body" id="initCodeBody"></div>
+      <div class="init-retry-wrap" id="initRetryWrap" hidden>
+        <button type="button" class="init-retry-btn" id="initRetryBtn">Retry Connection</button>
+      </div>
+      <div class="code-progress">
+        <div class="code-progress-fill" id="initProgFill"></div>
+      </div>
+    </section>
+
+    <!-- Announcements -->
+    <section class="announce-stack" id="announceBar" aria-label="Announcements" hidden></section>
+
+    <!-- Code-Base App Header -->
+    <div class="header-top" hidden>
+      <div class="header-brand">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </div>
+        <div class="header-title-wrap">
+          <span class="header-path">~/realme-in/rollback-finder</span>
+          <h1>Rollback Package Finder</h1>
+        </div>
+      </div>
+      <span class="db-pill" id="dbReadyPill">db.ready</span>
+    </div>
+
+    <!-- Hero -->
+    <header class="hero" hidden>
+      <span class="hero-tag">// community-curated · india region</span>
+      <h2>Find your rollback package link</h2>
+      <p class="sub">Pick your current realme UI version, choose your series, and we'll take you straight to the official post from realme where the rollback package for your device is available — built for the Indian region. Customer Support is always there to help too; this is simply another way to get there yourself.</p>
+    </header>
+
+    <!-- FAQ -->
+    <section class="faq-section" hidden>
+      <h3>FAQ</h3>
+      <details class="faq-item">
+        <summary class="faq-q">My device launched with UI 7 — can I roll back further?</summary>
+        <p class="faq-a">No. Rollback only works for versions your device actually received as an update. You can't go below the version it launched with — UI 7 is the floor here.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Can I roll back directly from UI 7 to UI 5?</summary>
+        <p class="faq-a">No. Rollback only goes one version back at a time. To go from UI 7 to UI 5, you'd first roll back to UI 6 using that package, then roll back again from UI 6 to UI 5 with a second package.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Can I roll back to a previous minor version within the same UI?</summary>
+        <p class="faq-a">No. realme only provides official rollback packages for major version downgrades (e.g. UI 7 to UI 6). Minor version rollback isn't officially supported — no package exists for it.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Don't know how to rollback safely?</summary>
+        <p class="faq-a"><a href="https://c.realme.com/in/post-details/2099076153779273728" target="_blank" rel="noopener">Read the full guide →</a></p>
+      </details>
+    </section>
+
+    <!-- Workflow Stepper -->
+    <h2 class="stepper-heading" hidden>Let's find your rollback package link</h2>
+    <div class="stepper" hidden>
+
+      <!-- Step 1: UI version -->
+      <section class="step" id="step1" data-state="active">
+        <p class="step-label"><span class="step-no">01</span> Select your current realme UI version <button type="button" class="step-change" id="changeVersion" hidden>Change</button></p>
+        <div class="chip-row" id="versionChips"></div>
+      </section>
+
+      <!-- Step 2: Series -->
+      <section class="step" id="step2" data-state="locked">
+        <p class="step-label"><span class="step-no">02</span> Choose your device series <button type="button" class="step-change" id="changeSeries" hidden>Change</button></p>
+        <div class="chip-row" id="seriesChips"></div>
+      </section>
+
+      <!-- Step 3: Search -->
+      <section class="step" id="step3" data-state="locked">
+        <p class="step-label"><span class="step-no">03</span> Find your device</p>
+        <div class="search-box">
+          <span class="search-prompt" aria-hidden="true">&gt;</span>
+          <input type="text" id="deviceSearch" placeholder="e.g., realme GT Neo 3..." autocomplete="off" disabled>
+          <ul class="suggestions" id="suggestions" hidden></ul>
+        </div>
+      </section>
+
+      <!-- Step 4: Result -->
+      <section class="step result" id="step4" data-state="locked">
+        <p class="step-label"><span class="step-no">04</span> Rollback package found</p>
+        <div class="result-card" id="resultCard">
+          <p class="empty-hint">// waiting for device selection...</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Request box -->
+    <section class="request" hidden>
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        Not finding your device?
+      </h2>
+      <p class="sub">Can't find your device above? Tell us which model and which UI version you're rolling back from — we'll add it here once we track down the official post.</p>
+      <form id="requestForm" novalidate>
+        <input type="text" id="reqWebsite" name="website" class="hp-field" autocomplete="off" tabindex="-1" aria-hidden="true">
+        <input type="text" id="reqDevice" placeholder="Device (e.g. realme 10 Pro)" maxlength="60" required>
+        <input type="text" id="reqVersion" placeholder="Rollback needed (e.g. UI 4.0 to 3.0)" maxlength="50" required>
+        <button type="submit">Submit Request</button>
+      </form>
+      <p class="form-note" id="formNote" role="status" aria-live="polite" hidden></p>
+      <div class="request-again" id="requestAgainPrompt" hidden>
+        <p>Want to submit another request?</p>
+        <div class="request-again-actions">
+          <button type="button" id="requestAgainYes">Yes, another</button>
+          <button type="button" id="requestAgainNo">No, I'm done</button>
+        </div>
+      </div>
+
+      <div class="contact-support" id="contactSupportBlock">
+        <p class="contact-support-label">// Go to realme's Official Support Desk</p>
+        <div class="contact-support-actions">
+          <a class="contact-btn contact-whatsapp" id="waContactBtn" href="https://wa.me/919711012312?text=Agent" target="_blank" rel="noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.04 2C6.58 2 2.13 6.44 2.13 11.9c0 1.86.5 3.6 1.4 5.1L2 22l5.14-1.5a9.9 9.9 0 0 0 4.9 1.3h.01c5.46 0 9.91-4.44 9.91-9.9C21.96 6.44 17.5 2 12.04 2zm0 18.03h-.01a8.11 8.11 0 0 1-4.14-1.13l-.3-.18-3.08.9.82-3-.19-.31a8.08 8.08 0 0 1-1.24-4.31c0-4.48 3.65-8.13 8.14-8.13 2.17 0 4.21.85 5.75 2.38a8.07 8.07 0 0 1 2.38 5.75c0 4.48-3.65 8.13-8.13 8.13z"/></svg>
+            WhatsApp
+          </a>
+          <a class="contact-btn contact-email" id="emailContactBtn" href="mailto:service@realme.com?subject=Request%20for%20Rollback%20Package%20Link&body=Hi%20Team%2C%0A%0AI%27d%20like%20to%20request%20the%20official%20rollback%20package%20link%20for%20my%20device%20so%20I%20can%20downgrade%20to%20an%20earlier%20realme%20UI%20version.%0A%0ADevice%3A%20%0ACurrent%20Version%3A%20%0ATarget%20Version%3A%20%0AIMEI%3A%20%0A%0ACould%20you%20please%20share%20the%20rollback%20package%20download%20link%20for%20this%20downgrade%3F%20Thank%20you.">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot" hidden>
+      <p>This site is entirely maintained and managed by <a href="https://c.realme.com/in/user/__knYWhjNxR2dBBjTxdDR__/posts" target="_blank" rel="noopener">XenoY96</a>.</p>
+      <p>Not an official realme product — just a fan-built tool to help the community.</p>
+    </footer>
+
+  </main>
+
+  <!-- Rollback warning modal -->
+  <div class="modal-backdrop" id="warningModal" hidden>
+    <div class="modal-card">
+      <div class="modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h3>Proceed with Caution</h3>
+      <p class="modal-warning" id="modalWarning"></p>
+      <div class="modal-actions">
+        <button type="button" class="modal-cancel" id="modalCancel">Go Back</button>
+        <button type="button" class="modal-continue" id="modalContinue">I Understand, Continue</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- CONFIG ---------- */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsynTWk5NTxzb6BFLU44aQ6Hltn35qUxdpwnh1HF0Ra3pyF948bSjA04n37Wpq8BSW/exec";
+
+/* ---------- STATE ---------- */
+let DATA = {};
+let ANNOUNCEMENTS = [];
+let SETTINGS = {};
+let state = { version: null, series: null, device: null };
+let fetchRunId = 0;
+const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+/* ---------- SAFE HELPERS ---------- */
+function esc(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeHref(url) {
+  const trimmed = String(url || "").trim();
+  return /^https?:\/\//i.test(trimmed) ? trimmed : "";
+}
+
+function extractHost(url) {
+  try {
+    return new URL(url).hostname;
+  } catch (e) {
+    return "c.realme.com";
+  }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function highlightCodeLine(raw) {
+  const re = /(\/\/.*$)|("(?:\\.|[^"\\])*")|\b(async|function|const|let|await|return|if|true|false)\b|\b(db|Object|LOCATED|READY)\b|\b(\d+)\b|\b([a-zA-Z_]\w*)(?=\s*:)|\.([a-zA-Z_]\w*)\b|\b([a-zA-Z_]\w*)(?=\s*\()/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(raw)) !== null) {
+    if (m.index > last) out += esc(raw.slice(last, m.index));
+    if (m[1]) {
+      const cls = /✖|error|failed/i.test(m[1]) ? "tok-err" : (/✓|LOCATED|READY/i.test(m[1]) ? "tok-ok" : "tok-cmt");
+      out += `<span class="${cls}">${esc(m[1])}</span>`;
+    } else if (m[2]) {
+      const isOkStr = m[2] === '"LOCATED"' || m[2] === '"READY"';
+      out += `<span class="${isOkStr ? "tok-ok" : "tok-str"}">${esc(m[2])}</span>`;
+    } else if (m[3]) out += `<span class="tok-kw">${esc(m[3])}</span>`;
+    else if (m[4]) out += `<span class="${m[4] === "LOCATED" || m[4] === "READY" ? "tok-ok" : "tok-fn"}">${esc(m[4])}</span>`;
+    else if (m[5]) out += `<span class="tok-num">${esc(m[5])}</span>`;
+    else if (m[6]) out += `<span class="tok-prop">${esc(m[6])}</span>`;
+    else if (m[7]) out += `.<span class="tok-prop">${esc(m[7])}</span>`;
+    else if (m[8]) out += `<span class="tok-fn">${esc(m[8])}</span>`;
+    last = re.lastIndex;
+  }
+  if (last < raw.length) out += esc(raw.slice(last));
+  return out;
+}
+
+function renderStaticCodeLines(lines) {
+  return lines.map((line, i) => `
+    <div class="code-line">
+      <span class="code-ln">${String(i + 1).padStart(2, "0")}</span>
+      <span class="code-text">${highlightCodeLine(line)}</span>
+    </div>
+  `).join("");
+}
+
+async function typeCodeLines(container, lines, progFill, opts) {
+  opts = opts || {};
+  const stepSize = opts.stepSize || 2;
+  const charDelay = opts.charDelay || 22;
+  const startLineNo = opts.startLineNo || 1;
+  const startPct = opts.startPct || 0;
+  const endPct = opts.endPct != null ? opts.endPct : 100;
+  const shouldAbort = opts.shouldAbort || (() => false);
+
+  const totalChars = Math.max(1, lines.reduce((sum, item) => sum + item.text.trimStart().length, 0));
+  let typedChars = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (shouldAbort()) return false;
+    const item = lines[i];
+    const raw = item.text;
+
+    if (typeof item.onStart === "function") item.onStart();
+
+    const rowEl = document.createElement("div");
+    rowEl.className = "code-line";
+    const lnSpan = document.createElement("span");
+    lnSpan.className = "code-ln";
+    lnSpan.textContent = String(startLineNo + i).padStart(2, "0");
+    const textSpan = document.createElement("span");
+    textSpan.className = "code-text";
+    rowEl.appendChild(lnSpan);
+    rowEl.appendChild(textSpan);
+    container.appendChild(rowEl);
+
+    const indentLen = raw.length - raw.trimStart().length;
+    const contentLen = raw.length - indentLen;
+
+    for (let c = 1; c <= contentLen; c += stepSize) {
+      if (shouldAbort()) return false;
+      const shownLen = Math.min(raw.length, indentLen + c);
+      textSpan.innerHTML = highlightCodeLine(raw.slice(0, shownLen)) + `<span class="code-cursor"></span>`;
+      if (progFill) {
+        const frac = (typedChars + Math.min(c, contentLen)) / totalChars;
+        progFill.style.width = Math.min(100, Math.round(startPct + frac * (endPct - startPct))) + "%";
+      }
+      await wait(charDelay);
+    }
+
+    if (shouldAbort()) return false;
+    typedChars += contentLen;
+    if (progFill) {
+      const frac = typedChars / totalChars;
+      progFill.style.width = Math.min(100, Math.round(startPct + frac * (endPct - startPct))) + "%";
+    }
+    textSpan.innerHTML = highlightCodeLine(raw) + (item.keepCursor ? `<span class="code-cursor"></span>` : "");
+
+    if (item.pause) await wait(item.pause);
+  }
+  return true;
+}
+
+/* ---------- LOAD ---------- */
+async function loadData() {
+  const res = await fetch(`${SCRIPT_URL}?_=${Date.now()}`, { cache: "no-store" });
+  const json = await res.json();
+  DATA = json.versions || {};
+  ANNOUNCEMENTS = json.announcements || [];
+  SETTINGS = json.settings || {};
+}
+
+function isOn(settingName) { return !!(SETTINGS[settingName] && SETTINGS[settingName].value); }
+function messageFor(settingName, fallback) {
+  const s = SETTINGS[settingName];
+  return (s && s.message) ? s.message : fallback;
+}
+
+function countLoadedDatabase() {
+  const versions = Object.keys(DATA);
+  let devices = 0;
+  versions.forEach(v => {
+    (DATA[v] || []).forEach(row => {
+      if (Array.isArray(row.devices)) devices += row.devices.length;
+    });
+  });
+  return { versions: versions.length, devices };
+}
+
+/* ---------- ANNOUNCEMENTS ---------- */
+function renderAnnouncements() {
+  const bar = document.getElementById("announceBar");
+  bar.innerHTML = "";
+  if (!ANNOUNCEMENTS.length) { bar.hidden = true; return; }
+  ANNOUNCEMENTS.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "announce-card";
+    const link = safeHref(a.link);
+    card.innerHTML = `
+      <span class="announce-badge">NOTICE</span>
+      <p class="announce-text">${esc(a.text)} ${link ? `<a class="announce-link" href="${esc(link)}" target="_blank" rel="noopener">Learn more ↗</a>` : ""}</p>
+    `;
+    bar.appendChild(card);
+  });
+  bar.hidden = false;
+}
+
+/* ---------- STEP 1: VERSION ---------- */
+function renderVersionChips() {
+  const row = document.getElementById("versionChips");
+  row.innerHTML = "";
+  Object.keys(DATA).forEach(v => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.type = "button";
+    chip.textContent = v;
+    chip.addEventListener("click", () => selectVersion(v, chip));
+    row.appendChild(chip);
+  });
+}
+
+function selectVersion(version, chipEl) {
+  hideRequestSectionIfOpen();
+  state.version = version;
+  state.series = null;
+  state.device = null;
+  [...chipEl.parentElement.children].forEach(c => c.classList.remove("selected"));
+  chipEl.classList.add("selected");
+
+  document.getElementById("step1").dataset.state = "done";
+  document.getElementById("changeVersion").hidden = false;
+  document.getElementById("step2").dataset.state = "active";
+  document.getElementById("step2").innerHTML = "";
+  buildStep2();
+  resetStep3();
+  resetResult();
+}
+
+function goBackToVersion() {
+  hideRequestSectionIfOpen();
+  state.version = null;
+  state.series = null;
+  state.device = null;
+  document.getElementById("step1").dataset.state = "active";
+  document.getElementById("changeVersion").hidden = true;
+  document.getElementById("step2").dataset.state = "locked";
+  document.getElementById("step2").innerHTML = `<p class="step-label"><span class="step-no">02</span> Choose your device series</p><div class="chip-row" id="seriesChips"></div>`;
+  resetStep3();
+  resetResult();
+  document.querySelectorAll("#versionChips .chip").forEach(c => c.classList.remove("selected"));
+}
+
+/* ---------- STEP 2: SERIES ---------- */
+function buildStep2() {
+  const step2 = document.getElementById("step2");
+  const label = document.createElement("p");
+  label.className = "step-label";
+  label.innerHTML = `<span class="step-no">02</span> Choose your device series <button type="button" class="step-change" id="changeSeries" hidden>Change</button>`;
+  label.querySelector("#changeSeries").addEventListener("click", goBackToSeries);
+  const row = document.createElement("div");
+  row.className = "chip-row";
+  row.id = "seriesChips";
+  step2.appendChild(label);
+  step2.appendChild(row);
+
+  const seriesList = [...new Set(DATA[state.version].map(r => r.series))];
+  seriesList.forEach(s => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.type = "button";
+    chip.textContent = s;
+    chip.addEventListener("click", () => selectSeries(s, chip));
+    row.appendChild(chip);
+  });
+}
+
+function selectSeries(series, chipEl) {
+  hideRequestSectionIfOpen();
+  state.series = series;
+  state.device = null;
+  [...chipEl.parentElement.children].forEach(c => c.classList.remove("selected"));
+  chipEl.classList.add("selected");
+
+  document.getElementById("step2").dataset.state = "done";
+  document.getElementById("changeSeries").hidden = false;
+  document.getElementById("step3").dataset.state = "active";
+  const input = document.getElementById("deviceSearch");
+  input.disabled = false;
+  input.value = "";
+  input.focus();
+  resetResult();
+}
+
+function goBackToSeries() {
+  hideRequestSectionIfOpen();
+  state.series = null;
+  state.device = null;
+  document.getElementById("step2").dataset.state = "active";
+  document.getElementById("step3").dataset.state = "locked";
+  document.getElementById("step4").dataset.state = "locked";
+  const step2 = document.getElementById("step2");
+  step2.innerHTML = "";
+  buildStep2();
+  resetStep3();
+  resetResult();
+}
+
+/* ---------- STEP 3: SEARCH (fuzzy) ---------- */
+function normalize(str) { return str.toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function fuzzyScore(query, target) {
+  const q = normalize(query), t = normalize(target);
+  if (!q) return 0;
+  if (t === q) return 100;
+  if (t.startsWith(q)) return 90;
+  if (t.includes(q)) return 75;
+  let matches = 0, ti = 0;
+  for (const ch of q) {
+    const idx = t.indexOf(ch, ti);
+    if (idx !== -1) { matches++; ti = idx + 1; }
+  }
+  if (matches < q.length) return 0;
+  return 50;
+}
+
+function getRowsForCurrentScope() {
+  return DATA[state.version].filter(r => r.series === state.series);
+}
+
+function searchDevices(query) {
+  const rows = getRowsForCurrentScope();
+  const results = [];
+  rows.forEach(row => {
+    row.devices.forEach(deviceName => {
+      const score = fuzzyScore(query, deviceName);
+      if (score > 0) results.push({ deviceName, row, score });
+    });
+  });
+  results.sort((a, b) => b.score - a.score);
+  return results.slice(0, 6);
+}
+
+function searchOtherSeries(query) {
+  const rows = DATA[state.version].filter(r => r.series !== state.series);
+  const results = [];
+  rows.forEach(row => {
+    row.devices.forEach(deviceName => {
+      const score = fuzzyScore(query, deviceName);
+      if (score > 0) results.push({ deviceName, row, score });
+    });
+  });
+  results.sort((a, b) => b.score - a.score);
+  return results.slice(0, 3);
+}
+
+function switchToSeriesAndSearch(series, query) {
+  const chip = [...document.querySelectorAll("#seriesChips .chip")].find(c => c.textContent === series);
+  if (!chip) return;
+  selectSeries(series, chip);
+  const input = document.getElementById("deviceSearch");
+  input.value = query;
+  input.dispatchEvent(new Event("input"));
+}
+
+function revealRequestSection() {
+  const section = document.querySelector(".request");
+  section.hidden = false;
+  window.formShownAt = Date.now();
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function revealSupportContact() {
+  const section = document.querySelector(".request");
+  section.hidden = false;
+  updateContactDrafts();
+  document.getElementById("contactSupportBlock").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function hideRequestSectionIfOpen() {
+  const section = document.querySelector(".request");
+  if (section.hidden) return;
+  section.hidden = true;
+  document.getElementById("requestForm").hidden = false;
+  document.getElementById("requestAgainPrompt").hidden = true;
+  const note = document.getElementById("formNote");
+  note.hidden = true;
+  note.textContent = "";
+}
+
+function initSearch() {
+  const input = document.getElementById("deviceSearch");
+  const list = document.getElementById("suggestions");
+  const step3 = document.getElementById("step3");
+
+  function setListVisible(visible) {
+    list.hidden = !visible;
+    step3.classList.toggle("search-open", visible);
+  }
+
+  input.addEventListener("input", () => {
+    hideRequestSectionIfOpen();
+    const q = input.value.trim();
+    if (!q) { setListVisible(false); list.innerHTML = ""; return; }
+    const matches = searchDevices(q);
+    if (!matches.length) {
+      const otherMatches = searchOtherSeries(q);
+      if (otherMatches.length) {
+        const wrongSeries = otherMatches[0].row.series;
+        list.innerHTML = `<li class="no-match wrong-series"><span>That looks like a <strong>${esc(wrongSeries)}</strong> series device — you've got <strong>${esc(state.series)}</strong> selected. <a href="#" id="switchSeriesLink">Switch to ${esc(wrongSeries)}</a> to find it.</span></li>`;
+        setListVisible(true);
+        document.getElementById("switchSeriesLink").addEventListener("click", (e) => {
+          e.preventDefault();
+          switchToSeriesAndSearch(wrongSeries, q);
+        });
+        return;
+      }
+      list.innerHTML = `<li class="no-match"><span>Device not found. <a href="#requestForm" id="noMatchLink">Submit a request</a> or <a href="#" id="noMatchSupportLink">reach Support Desk</a> for instant help.</span></li>`;
+      setListVisible(true);
+      document.getElementById("noMatchLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        setListVisible(false);
+        revealRequestSection();
+      });
+      document.getElementById("noMatchSupportLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        setListVisible(false);
+        revealSupportContact();
+      });
+      return;
+    }
+    list.innerHTML = "";
+    matches.forEach(m => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${esc(m.deviceName)}</span><span class="tag">${esc(m.row.series)}</span>`;
+      li.addEventListener("click", () => pickDevice(m.deviceName, m.row));
+      list.appendChild(li);
+    });
+    setListVisible(true);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-box")) setListVisible(false);
+  });
+}
+
+function resetStep3() {
+  document.getElementById("step3").dataset.state = "locked";
+  document.getElementById("step3").classList.remove("search-open");
+  const input = document.getElementById("deviceSearch");
+  input.disabled = true;
+  input.value = "";
+  document.getElementById("suggestions").hidden = true;
+}
+
+/* ---------- WARNING MODAL ---------- */
+const ROLLBACK_WARNING = "▲ Rollback is the last option to try. If you're facing any issue, please reach out to realme Customer Care or your nearest Service Centre first. Rollback is not recommended unless necessary - it erases all data on your device, complete data loss, with no way to recover it.";
+
+let pendingLink = null;
+
+function initWarningModal() {
+  document.getElementById("modalWarning").textContent = ROLLBACK_WARNING;
+
+  document.getElementById("modalCancel").addEventListener("click", closeWarningModal);
+  document.getElementById("warningModal").addEventListener("click", (e) => {
+    if (e.target.id === "warningModal") closeWarningModal();
+  });
+  document.getElementById("modalContinue").addEventListener("click", () => {
+    if (pendingLink) window.open(pendingLink, "_blank", "noopener");
+    closeWarningModal();
+  });
+}
+
+function openWarningModal(link) {
+  pendingLink = link;
+  document.getElementById("warningModal").hidden = false;
+}
+
+function closeWarningModal() {
+  pendingLink = null;
+  document.getElementById("warningModal").hidden = true;
+}
+
+/* ---------- STEP 4: LIVE CODE LOOKUP -> MATCHING CODE-BASE RESULT CARD ---------- */
+function renderFinalResultCard(deviceName, row) {
+  const card = document.getElementById("resultCard");
+  card.classList.remove("db-fetching");
+  card.classList.add("db-resolved", "db-located");
+
+  const safeDev = String(deviceName || "").replace(/["\\]/g, "");
+  const safeVer = String(state.version || "").replace(/["\\]/g, "");
+  const safeSer = String((row && row.series) || state.series || "").replace(/["\\]/g, "");
+  const targetVer = guessTargetVersion(state.version);
+  const pathText = targetVer ? `${safeVer} -> ${targetVer}` : safeVer;
+  const hostText = extractHost(row && row.link);
+
+  const payloadLines = [
+    `const rollbackPackage = {`,
+    `  device: "${safeDev}",`,
+    `  series: "${safeSer}",`,
+    `  rollback: "${pathText}",`,
+    `  region: "IN",`,
+    `  source: "${hostText}", // official post`,
+    `  status: "LOCATED"`,
+    `};`
+  ];
+
+  card.innerHTML = `
+    <div class="code-bar">
+      <div class="code-bar-left">
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="code-filename">rollbackLookup.js · output</span>
+      </div>
+      <span class="code-status">
+        <span class="code-status-dot"></span>
+        <span>located ✓</span>
+      </span>
+    </div>
+    <div class="res-shell-body result-reveal">
+      <div class="res-header-row">
+        <div class="res-title-group">
+          <p class="result-device">Package located</p>
+          <p class="result-title">${esc(deviceName)}</p>
+        </div>
+        <span class="res-path-badge">${esc(pathText)}</span>
+      </div>
+
+      <div class="res-code-box" aria-label="Resolved rollback package details">
+        ${renderStaticCodeLines(payloadLines)}
+      </div>
+
+      <div class="res-action-wrap">
+        <button type="button" class="result-link" id="openThreadBtn">
+          <span class="result-link-left">
+            <span class="result-link-prompt" aria-hidden="true">&gt;_</span>
+            <span>Open Official Post</span>
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        </button>
+
+        <div class="res-foot-bar">
+          <span class="res-foot-meta">// exit 0 · verified link</span>
+          <p class="result-alt">Wrong device? <a href="#requestForm" id="showRequestLink">Request a post</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="code-progress">
+      <div class="code-progress-fill" style="width:100%;"></div>
+    </div>
+  `;
+
+  document.getElementById("openThreadBtn").addEventListener("click", () => openWarningModal(row.link));
+  document.getElementById("showRequestLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    revealRequestSection();
+  });
+}
+
+async function runDatabaseLookupAnimation(deviceName, row) {
+  const myRun = ++fetchRunId;
+  const card = document.getElementById("resultCard");
+
+  if (REDUCED_MOTION) {
+    renderFinalResultCard(deviceName, row);
+    return;
+  }
+
+  const safeDev = String(deviceName || "").replace(/["\\]/g, "");
+  const safeVer = String(state.version || "").replace(/["\\]/g, "");
+  const safeSer = String((row && row.series) || state.series || "").replace(/["\\]/g, "");
+  const targetVer = guessTargetVersion(state.version) || "Previous UI";
+
+  card.classList.remove("db-located", "db-resolved");
+  card.classList.add("db-fetching");
+
+  card.innerHTML = `
+    <div class="code-bar">
+      <div class="code-bar-left">
+        <span class="win-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="code-filename">rollbackLookup.js</span>
+      </div>
+      <span class="code-status">
+        <span class="code-status-dot"></span>
+        <span id="dbStatusTag">running</span>
+      </span>
+    </div>
+    <div class="code-body" id="dbCodeBody"></div>
+    <div class="code-progress">
+      <div class="code-progress-fill" id="dbProgFill"></div>
+    </div>
+  `;
+
+  const codeBody = document.getElementById("dbCodeBody");
+  const statusTag = document.getElementById("dbStatusTag");
+  const progFill = document.getElementById("dbProgFill");
+
+  const lookupLines = [
+    { text: `// Querying realme rollback database...`, pause: 160 },
+    { text: `async function fetchRollbackPackage() {`, pause: 110 },
+    { text: `  const device = await db.locateDevice({`, pause: 90 },
+    { text: `    model: "${safeDev}",`, pause: 90 },
+    { text: `    series: "${safeSer}"`, pause: 90 },
+    { text: `  });`, pause: 230 },
+    { text: `  const ui = resolveUI("${safeVer}"); // -> ${targetVer}`, pause: 200 },
+    { text: `  const pkg = await db.findPackage(device, ui);`, pause: 270 },
+    { text: `  if (pkg && pkg.verified) {`, pause: 100 },
+    { text: `    return { status: "LOCATED", post: pkg.url };`, pause: 130 },
+    { text: `  }`, pause: 70 },
+    { text: `}`, pause: 160 },
+    {
+      text: `// ✓ Package located — rendering output...`,
+      pause: 460,
+      onStart: () => {
+        card.classList.add("db-located");
+        if (statusTag) statusTag.textContent = "located";
+      }
+    }
+  ];
+
+  const completed = await typeCodeLines(codeBody, lookupLines, progFill, {
+    stepSize: 2,
+    charDelay: 24,
+    startLineNo: 1,
+    startPct: 0,
+    endPct: 100,
+    shouldAbort: () => myRun !== fetchRunId
+  });
+
+  if (!completed || myRun !== fetchRunId) return;
+  renderFinalResultCard(deviceName, row);
+}
+
+function pickDevice(deviceName, row) {
+  state.device = deviceName;
+  document.getElementById("suggestions").hidden = true;
+  document.getElementById("step3").classList.remove("search-open");
+  document.getElementById("deviceSearch").value = deviceName;
+  document.getElementById("step3").dataset.state = "done";
+  document.getElementById("step4").dataset.state = "active";
+  updateContactDrafts();
+  runDatabaseLookupAnimation(deviceName, row);
+}
+
+function updateContactDrafts() {
+  const current = state.version || "";
+  const target = guessTargetVersion(state.version);
+
+  const waMsg = "Agent";
+  const emailBody =
+`Hi Team,
+
+I'd like to request the official rollback package link for my device so I can downgrade to an earlier realme UI version.
+
+Device: ${state.device || ""}
+Current Version: ${current}
+Target Version: ${target}
+IMEI: 
+
+Could you please share the rollback package download link for this downgrade? Thank you.`;
+
+  const wa = document.getElementById("waContactBtn");
+  const email = document.getElementById("emailContactBtn");
+  if (wa) wa.href = `https://wa.me/919711012312?text=${encodeURIComponent(waMsg)}`;
+  if (email) email.href = `mailto:service@realme.com?subject=${encodeURIComponent("Request for Rollback Package Link")}&body=${encodeURIComponent(emailBody)}`;
+}
+
+function guessTargetVersion(version) {
+  const match = /^UI\s*(\d+)/i.exec(String(version || "").trim());
+  if (!match) return "";
+  const n = parseInt(match[1], 10);
+  return isNaN(n) ? "" : `UI ${n - 1}`;
+}
+
+function resetResult() {
+  fetchRunId++;
+  document.getElementById("step4").dataset.state = "locked";
+  const card = document.getElementById("resultCard");
+  card.classList.remove("db-fetching", "db-located", "db-resolved");
+  card.innerHTML = `<p class="empty-hint">// waiting for device selection...</p>`;
+}
+
+/* ---------- REQUEST FORM ---------- */
+function validateField(text, maxLen) {
+  const t = text.trim();
+  if (!t) return { ok: false, reason: "This field is required." };
+  if (t.length > maxLen) return { ok: false, reason: `Keep it under ${maxLen} characters.` };
+  if (/https?:\/\/|www\.|\.(com|net|org|in|io|co|link|xyz)\b/i.test(t)) {
+    return { ok: false, reason: "Links aren't allowed here." };
+  }
+  if (/<[^>]*>|javascript:|on\w+\s*=/i.test(t)) {
+    return { ok: false, reason: "Invalid characters detected." };
+  }
+  if (/^[=+\-@]/.test(t)) {
+    return { ok: false, reason: "Invalid starting characters." };
+  }
+  return { ok: true };
+}
+
+function initRequestForm() {
+  const form = document.getElementById("requestForm");
+  const note = document.getElementById("formNote");
+  const requestBox = document.querySelector(".request");
+
+  function showRequestNote(text, isError, success = false) {
+    note.hidden = false;
+    note.className = "form-note" + (isError ? " error" : " success");
+    note.textContent = text;
+    note.style.opacity = "1";
+    void note.offsetWidth;
+    note.style.animation = "none";
+    void note.offsetWidth;
+    note.style.animation = "noteIn .3s ease forwards";
+    if (success) {
+      requestBox.classList.remove("submitted");
+      void requestBox.offsetWidth;
+      requestBox.classList.add("submitted");
+    }
+  }
+
+  window.showRequestNote = showRequestNote;
+
+  if (isOn("Block Requests")) {
+    form.querySelectorAll("input, button").forEach(el => el.disabled = true);
+    showRequestNote(messageFor("Block Requests", "Requests are paused right now. Please try again later."), true);
+    return;
+  }
+
+  function fail(text, el) {
+    showRequestNote(text, true);
+    form.classList.remove("shake");
+    void form.offsetWidth;
+    form.classList.add("shake");
+    if (el) {
+      el.classList.add("field-error");
+      el.focus();
+      el.addEventListener("input", () => el.classList.remove("field-error"), { once: true });
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const deviceEl = document.getElementById("reqDevice");
+    const versionEl = document.getElementById("reqVersion");
+    const sendBtn = form.querySelector("button[type=submit]");
+    const btnLabel = "Submit Request";
+
+    const deviceCheck = validateField(deviceEl.value, 60);
+    if (!deviceCheck.ok) { fail(deviceCheck.reason, deviceEl); return; }
+    const versionCheck = validateField(versionEl.value, 50);
+    if (!versionCheck.ok) { fail(versionCheck.reason, versionEl); return; }
+
+    const shownAt = window.formShownAt || Date.now();
+    if (Date.now() - shownAt < 2500) {
+      fail("Take a moment and try again — that was a bit too quick.");
+      return;
+    }
+
+    sendBtn.disabled = true;
+    form.classList.add("submitting");
+    sendBtn.innerHTML = `<span class="btn-spinner"></span> Sending...`;
+    note.hidden = true;
+
+    const payload = {
+      device: deviceEl.value.trim(),
+      version: versionEl.value.trim(),
+      website: document.getElementById("reqWebsite").value,
+      loadedAt: shownAt
+    };
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      let result = null;
+      const raw = await res.text();
+      try { result = raw ? JSON.parse(raw) : null; } catch (_) {}
+
+      if (!res.ok) {
+        const statusMessages = {
+          400: "Submission rejected: the request data is invalid.",
+          403: "Submission rejected: you don't have permission to submit this request.",
+          429: "Submission limit reached. Please wait and try again later.",
+          500: "The submission server returned an error. Please try again later.",
+          502: "The submission service is temporarily unavailable. Please try again later.",
+          503: "The submission service is temporarily unavailable. Please try again later."
+        };
+        throw new Error(statusMessages[res.status] || `Submission failed (HTTP ${res.status}).`);
+      }
+
+      if (!result) throw new Error("The server returned an unreadable response. Your request could not be confirmed.");
+      if (result.error) throw new Error(String(result.message || result.error));
+      if (result.success === false || result.ok === false) throw new Error(String(result.message || "The server did not accept the request."));
+
+      sendBtn.classList.add("is-sent");
+      sendBtn.innerHTML = `<svg class="btn-check" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Submitted`;
+      showRequestNote("Got it - we'll take a look and add it if possible", false, true);
+      form.reset();
+      setTimeout(() => {
+        note.hidden = true;
+        note.textContent = "";
+        note.className = "form-note";
+        form.hidden = true;
+        document.getElementById("requestAgainPrompt").hidden = false;
+      }, 1800);
+    } catch (err) {
+      const message = err && err.message ? err.message : "Submission failed. Please try again.";
+      fail(message);
+    } finally {
+      form.classList.remove("submitting");
+      setTimeout(() => {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove("is-sent");
+        sendBtn.textContent = btnLabel;
+      }, 2200);
+    }
+  });
+
+  document.getElementById("requestAgainYes").addEventListener("click", () => {
+    document.getElementById("requestAgainPrompt").hidden = true;
+    form.hidden = false;
+    window.formShownAt = Date.now();
+    document.getElementById("reqDevice").focus();
+  });
+
+  document.getElementById("requestAgainNo").addEventListener("click", () => {
+    document.getElementById("requestAgainPrompt").hidden = true;
+    form.hidden = false;
+    document.querySelector(".request").hidden = true;
+  });
+}
+
+/* ---------- MAINTENANCE ---------- */
+function showMaintenance(message) {
+  document.querySelector(".wrap").innerHTML = `
+    <div class="state-msg">
+      <div style="margin-bottom:18px; display:flex; justify-content:center; color:var(--accent);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+      </div>
+      <h2>Under Maintenance</h2>
+      <p>${esc(message)}</p>
+    </div>`;
+}
+
+/* ---------- PWA ---------- */
+function initServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
+/* ---------- STARTUP BOOT ANIMATION + INIT ---------- */
+let uiInitialized = false;
+
+async function bootApp() {
+  const loadingShell = document.getElementById("loadingState");
+  const initBody = document.getElementById("initCodeBody");
+  const initStatusText = document.getElementById("initStatusText");
+  const initProgFill = document.getElementById("initProgFill");
+  const initRetryWrap = document.getElementById("initRetryWrap");
+
+  loadingShell.classList.remove("is-ready", "is-leaving", "is-error");
+  initBody.innerHTML = "";
+  initRetryWrap.hidden = true;
+  initStatusText.textContent = "initializing";
+  initProgFill.style.width = "0%";
+
+  // Start fetching real database immediately in parallel with the boot code animation
+  const dataPromise = loadData().then(
+    () => ({ ok: true }),
+    (err) => ({ ok: false, err })
+  );
+
+  if (!REDUCED_MOTION) {
+    const bootLines = [
+      { text: `// Initializing realme rollback database...`, pause: 140 },
+      { text: `async function initDatabase() {`, pause: 100 },
+      { text: `  const region = "IN";`, pause: 80 },
+      { text: `  const db = await connect(ROLLBACK_REGISTRY);`, pause: 140, keepCursor: true }
+    ];
+    await typeCodeLines(initBody, bootLines, initProgFill, {
+      stepSize: 2,
+      charDelay: 22,
+      startLineNo: 1,
+      startPct: 0,
+      endPct: 58
+    });
+  }
+
+  const outcome = await dataPromise;
+
+  // Remove waiting cursor from line 4 before printing the result lines
+  const lastCursor = initBody.querySelector(".code-cursor");
+  if (lastCursor) lastCursor.remove();
+
+  if (!outcome.ok) {
+    loadingShell.classList.add("is-error");
+    initStatusText.textContent = "offline";
+    initProgFill.style.width = "100%";
+    const errLines = [
+      { text: `  // ✖ Connection failed — check internet and retry`, pause: 0 },
+      { text: `}`, pause: 0 }
+    ];
+    await typeCodeLines(initBody, errLines, null, {
+      stepSize: 3,
+      charDelay: 14,
+      startLineNo: 5
+    });
+    initRetryWrap.hidden = false;
+    return;
+  }
+
+  if (isOn("Maintenance Mode")) {
+    showMaintenance(messageFor("Maintenance Mode", "We're currently performing updates. Be right back!"));
+    return;
+  }
+
+  const counts = countLoadedDatabase();
+
+  if (!REDUCED_MOTION) {
+    const readyLines = [
+      { text: `  const tracks = Object.keys(db.versions); // ${counts.versions} UI tracks`, pause: 120 },
+      { text: `  const index = buildSearchIndex(db); // ${counts.devices} devices`, pause: 130 },
+      { text: `  return { status: "READY", tracks, index };`, pause: 110 },
+      { text: `}`, pause: 110 },
+      {
+        text: `// ✓ Database ready — launching interface...`,
+        pause: 420,
+        onStart: () => {
+          loadingShell.classList.add("is-ready");
+          initStatusText.textContent = "ready";
+        }
+      }
+    ];
+    await typeCodeLines(initBody, readyLines, initProgFill, {
+      stepSize: 2,
+      charDelay: 20,
+      startLineNo: 5,
+      startPct: 58,
+      endPct: 100
+    });
+
+    loadingShell.classList.add("is-leaving");
+    await wait(320);
+  }
+
+  loadingShell.hidden = true;
+
+  const readyPill = document.getElementById("dbReadyPill");
+  if (readyPill) readyPill.textContent = `db.ready (${counts.devices})`;
+
+  const revealed = document.querySelectorAll(".header-top, .hero, .faq-section, .stepper-heading, .stepper, .foot");
+  revealed.forEach(el => {
+    el.hidden = false;
+    el.classList.add("app-reveal");
+  });
+
+  renderAnnouncements();
+  renderVersionChips();
+
+  if (!uiInitialized) {
+    uiInitialized = true;
+    document.getElementById("changeVersion").addEventListener("click", goBackToVersion);
+    document.getElementById("changeSeries").addEventListener("click", goBackToSeries);
+    initSearch();
+    initRequestForm();
+    initWarningModal();
+  }
+}
+
+document.getElementById("initRetryBtn").addEventListener("click", bootApp);
+initServiceWorker();
+bootApp();
+</script>
+</body>
+</html>
